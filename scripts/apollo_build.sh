@@ -51,7 +51,8 @@ function determine_build_targets() {
             build_targets="//modules/drivers/... ${exceptions}"
         elif [[ "${compo}" == "cyber" ]]; then
             if [[ "${ARCH}" == "x86_64" ]]; then
-                build_targets="//cyber/... union //modules/tools/visualizer/..."
+                # build_targets="//cyber/... union //modules/tools/visualizer/..."
+                build_targets="//cyber/..."
             else
                 build_targets="//cyber/..."
             fi
