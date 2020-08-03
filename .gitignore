@@ -3,7 +3,6 @@ bazel-*
 /Debug/
 *.pyc
 *genrule.log
-WORKSPACE
 # temporary files
 *.swp
 *.swo
