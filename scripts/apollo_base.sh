@@ -42,6 +42,7 @@ function set_lib_path() {
   export PYTHONPATH="${APOLLO_ROOT_DIR}/modules/tools:${PYTHONPATH}"
   # Set teleop paths
   export PYTHONPATH="${APOLLO_ROOT_DIR}/modules/teleop/common:${PYTHONPATH}"
+  export CPLUS_INCLUDE_PATH=/usr/local/fast-rtps/include:$CPLUS_INCLUDE_PATH
   add_to_path "/apollo/modules/teleop/common/scripts"
 }
 
