@@ -1,0 +1,229 @@
+syntax = "proto2";
+
+package apollo.canbus;
+
+import "modules/common/configs/proto/vehicle_config.proto";
+import "modules/canbus/proto/chassis.proto";
+import "modules/canbus/proto/diamond.proto";
+
+message ChassisDetail {
+  optional BasicInfo basic = 2;             // basic info
+  optional Safety safety = 3;               // safety
+  optional Gear gear = 4;                   // gear
+  optional Ems ems = 5;                     // engine manager system
+  optional Esp esp = 6;                     // Electronic Stability Program
+  optional Gas gas = 7;                     // gas pedal
+  optional Epb epb = 8;                     // Electronic parking brake
+  optional Brake brake = 9;                 // brake pedal
+  optional VehicleSpd vehicle_spd = 11;     // vehicle speed
+  optional Light light = 13;                // Light
+  optional Battery battery = 14;            // Battery info
+  optional CheckResponseSignal check_response = 15;
+  optional Surround surround = 17;     
+  optional Diamond diamond = 19;
+  // Reserve fields for other vehicles
+  optional apollo.common.VehicleID vehicle_id = 101;
+}
+
+// CheckResponseSignal
+message CheckResponseSignal {
+  optional bool is_eps_online = 1 [default = false];   // byd:0x34C qirui:0x505
+  optional bool is_epb_online = 2 [default = false];   // byd:0x218
+  optional bool is_esp_online = 3 [default = false];   // byd:0x122 qirui:0x451
+  optional bool is_vtog_online = 4 [default = false];  // byd:0x242
+  optional bool is_scu_online = 5 [default = false];   // byd:0x35C
+  optional bool is_switch_online = 6 [default = false];  // byd:0x133
+  optional bool is_vcu_online = 7 [default = false];     //  qirui:0x400
+}
+
+// Battery
+message Battery {
+  optional double battery_percent = 1;  // unit:%, battery percentage left
+  // lincoln fuellevel 72
+  optional double fuel_level = 2;
+}
+
+// light
+message Light {
+  enum TurnLightType {
+    TURN_LIGHT_OFF = 0;
+    TURN_LEFT_ON = 1;
+    TURN_RIGHT_ON = 2;
+    TURN_LIGHT_ON = 3;
+  }
+  enum BeamLampType {
+    BEAM_OFF = 0;
+    HIGH_BEAM_ON = 1;
+    LOW_BEAM_ON = 2;
+  }
+
+  optional TurnLightType turn_light_type = 1;
+  optional BeamLampType beam_lamp_type = 2;
+  optional bool is_brake_lamp_on = 3;
+}
+
+message VehicleSpd {
+  // esp 277
+  optional bool is_vehicle_standstill = 1;
+
+  // esp 218
+  optional bool is_vehicle_spd_valid = 2;
+  optional double vehicle_spd = 3 [default = 0];  // unit:m/s
+  // esp 208
+  optional bool is_wheel_spd_rr_valid = 4;
+  optional WheelSpeed.WheelSpeedType wheel_direction_rr = 5;
+  optional double wheel_spd_rr = 6;
+  optional bool is_wheel_spd_rl_valid = 7;
+  optional WheelSpeed.WheelSpeedType wheel_direction_rl = 8;
+  optional double wheel_spd_rl = 9;
+  optional bool is_wheel_spd_fr_valid = 10;
+  optional WheelSpeed.WheelSpeedType wheel_direction_fr = 11;
+  optional double wheel_spd_fr = 12;
+  optional bool is_wheel_spd_fl_valid = 13;
+  optional WheelSpeed.WheelSpeedType wheel_direction_fl = 14;
+  optional double wheel_spd_fl = 15;
+}
+message Brake {
+  enum HSAStatusType {
+    HSA_INACTIVE = 0;
+    HSA_FINDING_GRADIENT = 1;
+    HSA_ACTIVE_PRESSED = 2;
+    HSA_ACTIVE_RELEASED = 3;
+    HSA_FAST_RELEASE = 4;
+    HSA_SLOW_RELEASE = 5;
+    HSA_FAILED = 6;
+    HSA_UNDEFINED = 7;
+  }
+  enum HSAModeType {
+    HSA_OFF = 0;
+    HSA_AUTO = 1;
+    HSA_MANUAL = 2;
+    HSA_MODE_UNDEFINED = 3;
+  }
+  // ems 255
+  optional bool is_brake_pedal_pressed = 1
+      [default = false];  // only manual brake
+  // esp 277
+  optional bool is_brake_force_exist =
+      2;  // no matter auto mode brake or manual brake
+  optional bool is_brake_over_heat = 3;
+
+  optional bool is_hand_brake_on = 4;  // hand brake
+  optional double brake_pedal_position = 5;
+}
+
+// Electrical Parking Brake
+message Epb {
+  enum PBrakeType {
+    PBRAKE_OFF = 0;
+    PBRAKE_TRANSITION = 1;
+    PBRAKE_ON = 2;
+    PBRAKE_FAULT = 3;
+  }
+  // epb 256
+  optional bool is_epb_error = 1;
+  optional bool is_epb_released = 2;
+
+  // byd epb 218
+  optional int32 epb_status = 3;
+
+  // lincoln brakeinfo 74
+  optional PBrakeType parking_brake_status = 4;
+}
+
+message Gas {
+  // ems 255
+  optional bool is_gas_pedal_error = 1;
+  // ems 26a
+  optional bool is_gas_pedal_pressed_more = 2;  // more than auto mode gas torq
+  optional double gas_pedal_position = 3 [default = 0];  // manual gas
+  // byd vtog 342
+  optional bool is_gas_valid = 4 [default = false];
+}
+
+// Electronic Stability Program
+message Esp {
+  // esp 277
+  optional bool is_esp_acc_error = 1;  // for changan to control car
+
+  // esp 218
+  optional bool is_esp_on = 2;
+  optional bool is_esp_active = 3;
+  optional bool is_abs_error = 4;
+  optional bool is_abs_active = 5;
+  optional bool is_tcsvdc_fail = 6;
+}
+
+// Engine Manager System
+message Ems {
+  enum Type {
+    STOP = 0;
+    CRANK = 1;
+    RUNNING = 2;
+    INVALID = 3;
+  }
+  // ems 26a
+  optional bool is_engine_acc_available = 1;  // for changan to control car
+  optional bool is_engine_acc_error = 2;      // for changan to control car
+
+  // ems 265
+  optional Type engine_state = 3;
+  optional double max_engine_torq_percent =
+      4;  // for engine torq control, unit:%
+  optional double min_engine_torq_percent =
+      5;  // for engine torq control, unit:%
+  optional int32 base_engine_torq_constant =
+      6;  // for engine torq control, unit:Nm
+
+  // ems 255
+  optional bool is_engine_speed_error = 7;
+  optional double engine_speed = 8;
+
+  // byd vtog 241
+  optional int32 engine_torque = 9;
+  // byd vtog 242
+  optional bool is_over_engine_torque = 10;
+
+  // lincoln mkz throttleinfo 75
+  optional double engine_rpm = 11;
+}
+
+message Gear {
+  // tcu 268
+  optional bool is_shift_position_valid = 1;
+  // chanan: tcu 268
+  optional Chassis.GearPosition gear_state = 2;
+  // lincoln gear 67
+  optional bool driver_override = 3;
+  optional Chassis.GearPosition gear_cmd = 4;
+  optional bool canbus_fault = 5;
+}
+
+message Safety {
+  // ip 270
+  optional bool is_driver_car_door_close = 1;
+  // sas 50
+  optional bool is_driver_buckled = 2;
+
+  // byd sws 4a8
+  optional int32 emergency_button = 3;
+}
+
+message BasicInfo {
+  enum Type {
+    OFF = 0;
+    ACC = 1;
+    ON = 2;
+    START = 3;
+    INVALID = 4;
+  }
+
+  optional bool is_auto_mode = 1;
+  optional Type power_state = 2;
+  optional bool is_air_bag_deployed = 3;
+  optional double odo_meter = 4;  // odo meter, unit:km
+  optional double drive_range =
+      5;  // the meter left when drive continuously, unit:km
+  optional bool is_system_error = 6;
+  optional bool is_human_interrupt = 7;  // human interrupt
+}
