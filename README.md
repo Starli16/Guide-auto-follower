@@ -1,4 +1,4 @@
-# Diamond Auto: An Autonomous Application Based On Cyber RT
+# Guide Auto
 
 ![Action Status](https://github.com/HotzoneAuto/guide-auto/workflows/guide/badge.svg)
 ## Environment Setup

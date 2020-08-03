@@ -152,7 +152,7 @@ function main() {
     fi
     bazel_build $@
     if [ -z "${SHORTHAND_TARGETS}" ]; then
-        SHORTHAND_TARGETS="diamond-auto"
+        SHORTHAND_TARGETS="guide-auto"
         build_simulator
     fi
     success "Done building ${SHORTHAND_TARGETS}. Enjoy!"
