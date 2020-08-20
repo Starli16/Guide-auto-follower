@@ -1,0 +1,16 @@
+# Define all coms in DAG streaming.
+    module_config {
+    module_library : "/apollo/bazel-bin/modules/guide_control/guide_control.so"
+    components {
+        class_name : "guide_Control"
+        config {
+            name : "guide_Control"
+            readers {
+                channel: "guide/ChassisDetail"
+            }
+            readers {
+                channel: "guide/TrajInfo"
+            }
+        }
+      }
+    }

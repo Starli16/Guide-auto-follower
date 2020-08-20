@@ -1,0 +1,13 @@
+# Define all coms in DAG streaming.
+    module_config {
+    module_library : "/apollo/bazel-bin/modules/guide_planner/guide_planner.so"
+    components {
+        class_name : "guide_Planner"
+        config {
+            name : "guide_Planner"
+            readers {
+                channel: "guide/ChassisDetail"
+            }
+        }
+      }
+    }

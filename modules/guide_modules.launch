@@ -1,0 +1,18 @@
+<cyber>
+    <module>
+        <name>guide_can</name>
+        <dag_conf>/apollo/modules/guide_can/dag/guide_can.dag</dag_conf>
+        <process_name>guide_can</process_name>
+    </module>
+
+    <module>
+        <name>guide_control</name>
+        <dag_conf>/apollo/modules/guide_control/dag/guide_control.dag</dag_conf>
+        <process_name>guide_control</process_name>
+    </module>
+    <module>
+        <name>guide_planner</name>
+        <dag_conf>/apollo/modules/guide_planner/dag/guide_planner.dag</dag_conf>
+        <process_name>guide_planner</process_name>
+    </module>
+</cyber>

@@ -1,0 +1,7 @@
+syntax = "proto2";
+package apollo.planner;
+
+message TrajInfo{
+  repeated double rel_x=1;
+  repeated double rel_y=2; 
+};

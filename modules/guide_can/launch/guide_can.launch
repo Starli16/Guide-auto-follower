@@ -1,0 +1,7 @@
+<cyber>
+    <module>
+        <name>guide_can</name>
+        <dag_conf>/apollo/modules/guide_can/dag/guide_can.dag</dag_conf>
+        <process_name>guide_can</process_name>
+    </module>
+</cyber>

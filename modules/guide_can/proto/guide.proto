@@ -1,0 +1,67 @@
+syntax = "proto2";
+
+package apollo.canbus;
+
+message Id_0x03100000 {
+// Report Message
+  // [m/s] [0|80]
+  optional double leader_speed = 1;
+  // [m/s^2] [-15|15]
+  optional double leader_acc = 2;
+}
+
+message Id_0x04ef8480 {
+// Control Message
+  // [deg] [-880|880]
+  optional double control_steer = 1;
+}
+
+message Id_0x18ff4bd1 {
+// Report Message
+  // [deg] [-1260|1260]
+  optional double steer_angle = 1;
+}
+
+message Id_0x18f02501 {
+// Report Message
+  // [m/s] [0|80]
+  optional double x_speed = 1;
+  // [m/s^2] [-15|15]
+  optional double x_acc = 2;
+}
+
+message Id_0x18f02502 {
+// Report Message
+  // [deg] [0|200]
+  optional double pedal_acc = 1;
+  // [deg] [0|200]
+  optional double pedal_brake = 2;
+}
+
+message Id_0x00000650 {
+// Report Message
+  // [deg] [0|0]
+  optional int32 uwb_zitai = 1;
+  // [deg] [0|0]
+  optional int32 uwb_fangwei = 2;
+  // [m] [0|0]
+  optional double uwb_distance = 3;
+  // [] [0|0]
+  optional int32 uwb_status = 4;
+}
+
+message Id_0x0c040b2a {
+// Control Message
+  // [m/s^2] [-15|15]
+  optional double control_acc = 1;
+}
+
+message Guide {
+  optional Id_0x03100000 id_0x03100000 = 1; // report message
+  optional Id_0x04ef8480 id_0x04ef8480 = 2; // control message
+  optional Id_0x18ff4bd1 id_0x18ff4bd1 = 3; // report message
+  optional Id_0x18f02501 id_0x18f02501 = 4; // report message
+  optional Id_0x18f02502 id_0x18f02502 = 5; // report message
+  optional Id_0x00000650 id_0x00000650 = 6; // report message
+  optional Id_0x0c040b2a id_0x0c040b2a = 7; // control message
+}

@@ -1,0 +1,11 @@
+# Define all coms in DAG streaming.
+    module_config {
+    module_library : "/apollo/bazel-bin/modules/guide_can/guide_can.so"
+    timer_components {
+        class_name : "guide_Canbus"
+        config {
+            name : "guide_Canbus"
+            interval : 20
+        }
+      }
+    }

@@ -1,0 +1,7 @@
+<cyber>
+    <module>
+        <name>guide_planner</name>
+        <dag_conf>/apollo/modules/guide_planner/dag/guide_planner.dag</dag_conf>
+        <process_name>guide_planner</process_name>
+    </module>
+</cyber>
