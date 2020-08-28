@@ -65,6 +65,25 @@ void Id0x0c040b2a::set_p_control_acc(uint8_t* data, double control_acc) {
   t = x & 0xFF;
   Byte to_set1(data + 1);
   to_set1.set_value(t, 0, 8);
+
+  // set mode
+  int mode;
+  if(control_acc == 0) mode=0;
+  else if(control_acc < 0) mode = 1;
+  else if(control_acc > 0) mode = 2;
+  t = (mode <<4) & 0xFF;
+  Byte to_set2(data + 2);
+  to_set2.set_value(t, 0, 8);
+
+
+  // set cycle 
+  static int p=0;
+  p=p+1;
+  if(p>15) p=0;
+  t = p & 0xFF;
+  Byte to_set3(data + 7);
+  to_set3.set_value(t, 0, 8);
+
 }
 
 }  // namespace guide

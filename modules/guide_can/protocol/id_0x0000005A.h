@@ -32,7 +32,8 @@ class Id0x0000005A : public ::apollo::drivers::canbus::ProtocolData<
              ChassisDetail* chassis) const override;
 
  private:
-  double follower_yaw_rate(const std::uint8_t* bytes, const int32_t length) const;
+  double follower_yaw_rate(const std::uint8_t* bytes,
+                           const int32_t length) const;
 };
 
 }  // namespace guide

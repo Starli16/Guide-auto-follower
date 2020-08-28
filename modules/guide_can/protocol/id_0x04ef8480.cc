@@ -36,16 +36,22 @@ uint32_t Id0x04ef8480::GetPeriod() const {
 }
 
 void Id0x04ef8480::UpdateData(uint8_t* data) {
+  set_p_enable(data,enable_);
   set_p_control_steer(data, control_steer_);
 }
 
 void Id0x04ef8480::Reset() {
   // TODO(All) :  you should check this manually
   control_steer_ = 0.0;
+  enable_=0;
 }
 
 Id0x04ef8480* Id0x04ef8480::set_control_steer(double control_steer) {
   control_steer_ = control_steer;
+  return this;
+}
+Id0x04ef8480* Id0x04ef8480::set_enable(int enable) {
+  enable_ = enable;
   return this;
 }
 
@@ -56,6 +62,11 @@ void Id0x04ef8480::set_p_control_steer(uint8_t* data, double control_steer) {
   control_steer = ProtocolData::BoundedValue(-880.0, 880.0, control_steer);
   int x = (control_steer - -3276.700000) / 0.100000;
   uint8_t t = 0;
+  //set enable
+
+  t=100&0xFF;
+  Byte to_setVelocity(data+1);
+  to_setVelocity.set_value(t,0,8);
 
   t = x & 0xFF;
   Byte to_set0(data + 2);
@@ -66,6 +77,16 @@ void Id0x04ef8480::set_p_control_steer(uint8_t* data, double control_steer) {
   Byte to_set1(data + 3);
   to_set1.set_value(t, 0, 8);
 }
+
+void Id0x04ef8480::set_p_enable(uint8_t* data, const int enable) {
+  uint8_t t = 0;
+  if(enable==1)   t=1&0xFF;
+  else t=0&0xFF;
+  
+  Byte to_setEnable(data);
+  to_setEnable.set_value(t,0,8);
+}
+
 
 }  // namespace guide
 }  // namespace canbus

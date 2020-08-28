@@ -80,12 +80,16 @@ void GuideController::Stop() {
   if (is_start) is_start = false;
 }
 
-void GuideController::ControlUpdate(ControlCommand cmd) {
+void GuideController::ControlUpdate(ControlCommand cmd,const int SteerEnable,const int AccEnable) {
   if (!is_start) {
     AERROR << "Controller didn't start";
     return;
   }
-
-  id_0x04ef8480_->set_control_steer(cmd.control_steer());
-  id_0x0c040b2a_->set_control_acc(cmd.control_acc());
+  if(SteerEnable==1){
+    id_0x04ef8480_->set_enable(SteerEnable);
+    id_0x04ef8480_->set_control_steer(cmd.control_steer());
+  }
+  if(AccEnable==1){
+    id_0x0c040b2a_->set_control_acc(cmd.control_acc());
+  }
 }

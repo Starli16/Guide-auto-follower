@@ -32,13 +32,14 @@ const int32_t Id0x0000005A::ID = 0x0000005A;
 
 void Id0x0000005A::Parse(const std::uint8_t* bytes, int32_t length,
                          ChassisDetail* chassis) const {
-    chassis->set_follower_yaw_rate(follower_yaw_rate(bytes, length));
+  chassis->set_follower_yaw_rate(follower_yaw_rate(bytes, length));
 }
 
 // config detail: {'name': 'leader_speed', 'offset': 0.0, 'precision': 0.1,
 // 'len': 16, 'is_signed_var': False, 'physical_range': '[0|80]', 'bit': 32,
 // 'type': 'double', 'order': 'intel', 'physical_unit': 'm/s'}
-double Id0x0000005A::follower_yaw_rate(const std::uint8_t* bytes, const int32_t length) const {
+double Id0x0000005A::follower_yaw_rate(const std::uint8_t* bytes,
+                                       const int32_t length) const {
   Byte t0(bytes + 2);
   int16_t x = t0.get_byte(0, 8);
 
@@ -47,11 +48,9 @@ double Id0x0000005A::follower_yaw_rate(const std::uint8_t* bytes, const int32_t 
   x <<= 8;
   x |= t;
 
-  double ret = x / 131;
+  double ret = (double)(x) / 131;
   return ret;
 }
-
-
 
 }  // namespace guide
 }  // namespace canbus

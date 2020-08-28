@@ -71,8 +71,9 @@ void Planner::traj_seq_update(float rel_x, float rel_y, float vx_1,
                      (old_y - rel_y) * (old_y - rel_y));
 
     // to far then reset;
-    if(dis > ResetDistance){
-        Init(rel_x,rel_y,rel_yaw);
+    if(dis > ErrorDistance){
+        //Init(rel_x,rel_y,rel_yaw);
+        traj = traj_seq;
         return;
     }
     //加入新轨迹点

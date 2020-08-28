@@ -1,0 +1,7 @@
+<cyber>
+    <module>
+        <name>guide_filter</name>
+        <dag_conf>/apollo/modules/guide_filter/dag/guide_filter.dag</dag_conf>
+        <process_name>guide_filter</process_name>
+    </module>
+</cyber>

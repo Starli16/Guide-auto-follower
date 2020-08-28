@@ -47,10 +47,10 @@ void Id0x03100000::Parse(const std::uint8_t* bytes, int32_t length,
 double Id0x03100000::leader_speed(const std::uint8_t* bytes,
                                   int32_t length) const {
   Byte t0(bytes + 5);
-  int32_t x = t0.get_byte(0, 8);
+  uint16_t x = t0.get_byte(0, 8);
 
   Byte t1(bytes + 4);
-  int32_t t = t1.get_byte(0, 8);
+  uint16_t t = t1.get_byte(0, 8);
   x <<= 8;
   x |= t;
 
@@ -64,10 +64,10 @@ double Id0x03100000::leader_speed(const std::uint8_t* bytes,
 double Id0x03100000::leader_acc(const std::uint8_t* bytes,
                                 int32_t length) const {
   Byte t0(bytes + 3);
-  int32_t x = t0.get_byte(0, 8);
+  uint16_t x = t0.get_byte(0, 8);
 
   Byte t1(bytes + 2);
-  int32_t t = t1.get_byte(0, 8);
+  uint16_t t = t1.get_byte(0, 8);
   x <<= 8;
   x |= t;
 
@@ -92,10 +92,10 @@ double Id0x03100000::leader_brake_pedal(const std::uint8_t* bytes,
 double Id0x03100000::leader_acc_pedal(const std::uint8_t* bytes,
                                       int32_t length) const {
   Byte t0(bytes + 4);
-  int32_t x = t0.get_byte(0, 8);
+  uint16_t x = t0.get_byte(0, 8);
 
   Byte t1(bytes + 3);
-  int32_t t = t1.get_byte(0, 8);
+  uint16_t t = t1.get_byte(0, 8);
   x <<= 8;
   x |= t;
 

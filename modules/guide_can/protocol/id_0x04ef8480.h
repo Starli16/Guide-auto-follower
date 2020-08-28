@@ -40,15 +40,17 @@ class Id0x04ef8480 : public ::apollo::drivers::canbus::ProtocolData<
   // 0.1, 'len': 16, 'is_signed_var': False, 'physical_range': '[-880|880]',
   // 'bit': 16, 'type': 'double', 'order': 'intel', 'physical_unit': 'deg'}
   Id0x04ef8480* set_control_steer(double control_steer);
-
+  Id0x04ef8480* set_enable(int enable);
  private:
   // config detail: {'name': 'Control_steer', 'offset': -3276.7, 'precision':
   // 0.1, 'len': 16, 'is_signed_var': False, 'physical_range': '[-880|880]',
   // 'bit': 16, 'type': 'double', 'order': 'intel', 'physical_unit': 'deg'}
   void set_p_control_steer(uint8_t* data, double control_steer);
+  void set_p_enable(uint8_t* data, const int enable);
 
  private:
   double control_steer_;
+  int enable_;
 };
 
 }  // namespace guide

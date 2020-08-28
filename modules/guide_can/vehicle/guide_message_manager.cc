@@ -19,12 +19,12 @@
 #include "modules/guide_can/protocol/id_0x04ef8480.h"
 #include "modules/guide_can/protocol/id_0x0c040b2a.h"
 
+#include "modules/guide_can/protocol/id_0x0000005A.h"
 #include "modules/guide_can/protocol/id_0x00000650.h"
 #include "modules/guide_can/protocol/id_0x03100000.h"
 #include "modules/guide_can/protocol/id_0x18f02501.h"
 #include "modules/guide_can/protocol/id_0x18f02502.h"
 #include "modules/guide_can/protocol/id_0x18ff4bd1.h"
-#include "modules/guide_can/protocol/id_0x0000005A.h"
 
 namespace apollo {
 namespace canbus {
@@ -34,9 +34,14 @@ GuideMessageManager::GuideMessageManager() {
   // Control Messages
   AddSendProtocolData<Id0x04ef8480, true>();
   AddSendProtocolData<Id0x0c040b2a, true>();
+  ::apollo::drivers::canbus::ProtocolData<apollo::canbus::ChassisDetail>
+      *id8480 = GetMutableProtocolDataById(0x04ef8480);
+  id8480->SetDataLength(4);
+  // set steer data_length
 
   // Report Messages
   AddRecvProtocolData<Id0x00000650, true>();
+  AddRecvProtocolData<Id0x0000005A, true>();
   AddRecvProtocolData<Id0x03100000, true>();
   AddRecvProtocolData<Id0x18f02501, true>();
   AddRecvProtocolData<Id0x18f02502, true>();

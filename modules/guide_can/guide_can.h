@@ -25,6 +25,8 @@ using apollo::drivers::canbus::can::SocketCanClientRaw;
 class guide_Canbus : public apollo::cyber::TimerComponent {
  public:
  private:
+  int SteerEnable;
+  int AccEnable;
   bool Init() override;
   bool Proc() override;
   void Clear() override;

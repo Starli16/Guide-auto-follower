@@ -4,7 +4,7 @@
 #define PointsNumber 200
 #define SampleTime 0.02
 #define PointDistance 0.2
-#define ResetDistance 10
+#define ErrorDistance 10
 #include <cmath>
 #include <iostream>
 #include <vector>

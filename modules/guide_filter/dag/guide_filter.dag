@@ -1,0 +1,11 @@
+# Define all coms in DAG streaming.
+    module_config {
+    module_library : "/apollo/bazel-bin/modules/guide_filter/guide_filter.so"
+    timer_components {
+        class_name : "guide_Filter"
+        config {
+            name : "guide_Filter"
+            interval : 20
+        }
+      }
+    }

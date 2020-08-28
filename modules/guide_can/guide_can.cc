@@ -1,9 +1,10 @@
 #include "guide_can.h"
 
 #include <iostream>
+#include <cstdio>
 using std::cout;
 using std::endl;
-
+using namespace std;
 
 bool guide_Canbus::Init() {
   CanClient = std::unique_ptr<SocketCanClientRaw>(new SocketCanClientRaw());
@@ -38,6 +39,18 @@ bool guide_Canbus::Init() {
       "guide/ControlCommand",
       [this](const std::shared_ptr<ControlCommand>& msg) { OnControl(*msg); });
 
+  //read config;
+  
+  FILE* f;
+  f=fopen("/apollo/modules/guide_can/Control.config","r");
+  if(f!=NULL) {
+    fscanf(f,"%d%d",&SteerEnable,&AccEnable);
+    AINFO<<"SteerEnable= "<<SteerEnable<<" AccEnable=" << AccEnable;
+    fclose(f);
+  }
+  else AERROR << "ControlEnable.config Missing";
+
+
   return true;
 }
 
@@ -58,8 +71,21 @@ void guide_Canbus::PublishChassisDetail() {
 
   AINFO << "uwb distance is :" << sensordata.uwb_distance() << endl;
   AINFO << "uwb azimuth is :" << sensordata.uwb_azimuth() << endl;
+  AINFO << "yaw rate is : " << sensordata.follower_yaw_rate() << endl;
+  AINFO << "leader speed is : " << sensordata.leader_speed() << endl;
+  AINFO << "leader acc is : " << sensordata.leader_acc() << endl;
+  AINFO << "leader acc pedal is : " << sensordata.leader_acc_pedal() << endl;
   ADEBUG << sensordata.DebugString();
   chassis_detail_writer_->Write(sensordata);
+
+/*
+  ControlCommand cmd;
+  cmd.set_control_steer(0);
+  cmd.set_control_acc(0.5);
+  guide_controller.ControlUpdate(cmd);
+  can_sender.Update();
+*/
+
   return;
 }
 void guide_Canbus::OnControl(
@@ -69,7 +95,7 @@ void guide_Canbus::OnControl(
   cmd.set_control_steer(msg.control_steer());
   cmd.set_control_acc(msg.control_acc());
 
-  guide_controller.ControlUpdate(cmd);
+  guide_controller.ControlUpdate(cmd,SteerEnable,AccEnable);
   can_sender.Update();
   return;
 }

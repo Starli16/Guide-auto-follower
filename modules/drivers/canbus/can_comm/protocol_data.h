@@ -91,15 +91,21 @@ class ProtocolData {
    * @brief reset the protocol data
    */
   virtual void Reset();
+  /*
+   * set data length
+   */
 
+  void  SetDataLength(int32_t length){
+    data_length_=length;
+  }
   /*
    * @brief check if the value is in [lower, upper], if not , round it to bound
    */
   template <typename T>
   static T BoundedValue(T lower, T upper, T val);
-
+  
  private:
-  const int32_t data_length_ = CANBUS_MESSAGE_LENGTH;
+  int32_t data_length_ = CANBUS_MESSAGE_LENGTH;
 };
 
 template <typename SensorType>

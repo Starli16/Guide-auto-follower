@@ -41,7 +41,8 @@ void Id0x00000650::Parse(const std::uint8_t* bytes, int32_t length,
 // config detail: {'name': 'uwb_zitai', 'offset': 0.0, 'precision': 1.0, 'len':
 // 16, 'is_signed_var': True, 'physical_range': '[0|0]', 'bit': 48, 'type':
 // 'int', 'order': 'intel', 'physical_unit': 'deg'}
-int Id0x00000650::uwb_attitude(const std::uint8_t* bytes, int32_t length) const {
+int Id0x00000650::uwb_attitude(const std::uint8_t* bytes,
+                               int32_t length) const {
   Byte t0(bytes + 7);
   int32_t x = t0.get_byte(0, 8);
 

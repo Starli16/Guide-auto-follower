@@ -45,7 +45,7 @@ class GuideController {
   ::apollo::common::ErrorCode Init(
       CanSender<::apollo::canbus::ChassisDetail> *const can_sender_,
       MessageManager<::apollo::canbus::ChassisDetail> *const message_manager);
-  void ControlUpdate(ControlCommand cmd);
+  void ControlUpdate(ControlCommand cmd,const int SteerEnable,const int AccEnable);
   void Start();
   void Stop();
 
