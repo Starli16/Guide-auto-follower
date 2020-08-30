@@ -11,8 +11,8 @@ message ChassisDetail{
     optional double x_acc = 7;
     optional double pedal_acc = 8;
     optional double pedal_brake = 9;
-    optional int32 uwb_attitude = 10;
-    optional int32 uwb_azimuth = 11;
+    optional double uwb_attitude = 10;
+    optional double uwb_azimuth = 11;
     optional double uwb_distance = 12;
     optional int32 uwb_status = 13;
     optional double follower_yaw_rate = 14;

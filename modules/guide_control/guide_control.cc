@@ -1,28 +1,23 @@
 #include "guide_control.h"
 #include <cstdio>
-#define ACC_LIMIT 0.5
-#define DEACC_LIMIT -4
+#include <iostream>
+#include <map>
+#include <string>
+//#define ACC_LIMIT 0.5
+//#define DEACC_LIMIT -4
 
 float Desired_speed = 0;
-float Desired_distance = 20;
+//float Desired_distance = 20;
 constexpr float L = 5.0;
 constexpr float r = 1.0;
-constexpr float k_a = 0.1;
-constexpr float k_v = 0.05;
-constexpr float k_d = 0.05;
+//constexpr float k_a = 0.1;
+//constexpr float k_v = 0.05;
+//constexpr float k_d = 0.05;
 
 bool guide_Control::Init() {
   using namespace std;
+  ReadConfig();
   AINFO << "Guide_Control init";
-  FILE* f;
-  f=fopen("/apollo/modules/guide_control/SteerPID.config","r");
-  if(f!=NULL) {
-    fscanf(f,"%f%f%f",&steer_PID_kp,&steer_PID_ki,&steer_PID_kd);
-    AINFO<<"steerKP= "<<steer_PID_kp<<" steerKI=" << steer_PID_ki<<" steerKP=" << steer_PID_kd;
-    fclose(f);
-  }
-  else AERROR << "Steer PID config Missing";
-
   writer = node_->CreateWriter<ControlCommand>("guide/ControlCommand");
   // Init ControlCommand Writer
   return true;
@@ -147,7 +142,25 @@ float guide_Control::Caculate_steer(const std::shared_ptr<ChassisDetail>& msg0,
     */
   
   /* Specify a lookahead point*/
-  int index_la = FindLookAheadPointBezier(10);
+
+  
+  float CurrentSpeed=msg0->x_speed();
+  float LookAheadDistance=0;
+  float steer_PID_kp,steer_PID_ki,steer_PID_kd,steer_PID_prop;
+  int SpeedStage=0;
+  if(CurrentSpeed<=configinfo.Speed[1])   SpeedStage=0;
+  else if(CurrentSpeed<=configinfo.Speed[2]) SpeedStage=1;
+  else SpeedStage=2;
+  
+  LookAheadDistance=configinfo.LookAheadDistance[SpeedStage];
+  steer_PID_kp=configinfo.SteerKp[SpeedStage];
+  steer_PID_ki=configinfo.SteerKi[SpeedStage];
+  steer_PID_kd=configinfo.SteerKd[SpeedStage];
+  steer_PID_prop=configinfo.SteerPIDProportion;
+  // get config in current speed
+
+
+  int index_la = FindLookAheadPointBezier(LookAheadDistance);
   float long_distance;
   long_distance = BezierX[index_la];
   float lat_distance;
@@ -157,11 +170,11 @@ float guide_Control::Caculate_steer(const std::shared_ptr<ChassisDetail>& msg0,
   AINFO << "lookahead y is: " << lat_distance;
 
 
-  PID pid_steer(steer_PID_kp, steer_PID_ki, steer_PID_kd);
+  PID pid_steer(steer_PID_kp, steer_PID_ki, steer_PID_kd); // todo change
   float frontwheel_steer_angle =
-      -0.6 * atan(2 * L * lat_distance / (long_distance * long_distance)) * 180 /
+      -(1-steer_PID_prop)* atan(2 * L * lat_distance / (long_distance * long_distance)) * 180 /
           M_PI +
-      0.4*pid_steer.pid_control(0, err_lat) ;
+      steer_PID_prop*pid_steer.pid_control(0, err_lat) ;
   if (frontwheel_steer_angle > 20)
     frontwheel_steer_angle = 20;
   else if (frontwheel_steer_angle < -20)
@@ -189,6 +202,28 @@ float guide_Control::Caculate_acc(const std::shared_ptr<ChassisDetail>& msg0) {
   float Leader_Brake_pedal = msg0->leader_brake_pedal();
   float Leader_Acc_pedal=msg0->leader_acc_pedal();
   float control_acc = 0;
+  float Desired_distance=configinfo.DesiredDistance;
+  // read from message
+
+  float CurrentSpeed=msg0->x_speed();
+  float k_a,k_v,k_d;
+  float ACC_LIMIT=configinfo.AccLimit[1];
+  float DEACC_LIMIT=configinfo.AccLimit[0];
+  int SpeedStage=0;
+  float DeltaS_down,DeltaS_up;
+  float PedalEffect,AccCorrectMax,BrakeCorrectMax;
+  if(CurrentSpeed<=configinfo.Speed[1])   SpeedStage=0;
+  else if(CurrentSpeed<=configinfo.Speed[2]) SpeedStage=1;
+  else SpeedStage=2;
+  k_a=configinfo.AccKa[SpeedStage];
+  k_v=configinfo.AccKv[SpeedStage];
+  k_d=configinfo.AccKd[SpeedStage];
+  DeltaS_down=configinfo.DeltaS[0];
+  DeltaS_up=configinfo.DeltaS[1];
+  PedalEffect=configinfo.PedalEffect;
+  AccCorrectMax=configinfo.AccCorrectMax;
+  BrakeCorrectMax=configinfo.BrakeCorrectMax;
+  // // get config in current speed
 
   /******Distance Keeping Control*****/
 
@@ -197,42 +232,46 @@ float guide_Control::Caculate_acc(const std::shared_ptr<ChassisDetail>& msg0) {
   // cout << "delta x = " << long_distance - Desired_distance << endl;
   float distance_error = distance - float(Desired_distance);
   AINFO<<"distance_error= "<<distance_error;
-  if (distance_error < 10 && distance_error > -5)
+  if (distance_error < DeltaS_up && distance_error > DeltaS_down)
     control_acc = k_a * a1 + k_v * (v1 - v2) + k_d * distance_error;
   else
     control_acc = k_a * a1 / 2 + k_v * (v1 - v2) / 2 + k_d * distance_error * 2;
 
   if (control_acc < 0) control_acc = control_acc * 4;
   // cout << "Leader Brake Pedal = " << Leader_Brake_pedal << endl;
-  if (Leader_Brake_pedal > 45) control_acc = control_acc - 2.5;
+
 
   if(Leader_Brake_pedal>0){
     double pedal=Leader_Brake_pedal/100;
-    if(pedal>0.1 && pedal <0.5) {
-      double k=3*(0.6+0.8*pedal);
-      control_acc=control_acc-k*pedal;
-    }
-    else if (pedal >=0.5){
-      double k=3;
+    if(pedal>PedalEffect ) {
+      float kBrake=configinfo.kBrake;
+      float bBrake=configinfo.bBrake;
+      double k=kBrake*pedal+bBrake;
+      if(k>BrakeCorrectMax)  k=BrakeCorrectMax;
+
+      AINFO << "AccCorrect Value = -"<<k*pedal;
       control_acc=control_acc-k*pedal;
     }
   }
   else if(Leader_Acc_pedal>0){
     double pedal=Leader_Acc_pedal/100;
-    if(pedal>0.1) { 
-      double k=3*(0.4+0.4*pedal);
+    if(pedal>PedalEffect) { 
+      float kAcc=configinfo.kAcc;
+      float bAcc=configinfo.bAcc;
+      double k=kAcc*pedal+bAcc;
+      if(k>AccCorrectMax)  k=AccCorrectMax;
+      AINFO << "AccCorrect Value = "<<k*pedal;
       control_acc=control_acc+k*pedal;
     }
   }
-
-  // control_acc = 0.05 * (long_distance - Desired_distance);
+  // Acc Correct by Leader pedal
 
   // Saturation
   if (control_acc > ACC_LIMIT)
     control_acc = ACC_LIMIT;  // acc limit
   else if (control_acc < DEACC_LIMIT)
     control_acc = DEACC_LIMIT;  // deacc limit
-  // cout << "Control_acceleration = "<< to_string(control_acc) << endl;
+
   return control_acc;
 }
 
@@ -273,4 +312,64 @@ int guide_Control::FindLookAheadPointBezier(float LookAheadDis){
         if(DisSum>LookAheadDis) break;
     }
     return i;
+}
+
+
+
+
+void guide_Control::ReadConfig(){
+  using namespace std;
+  //map<string,float> configmap;
+  ifstream f;
+  f.open("/apollo/modules/guide_control/ControlSettings.config");
+  if(f.is_open()){
+      while(!f.eof()){
+        string SettingName;
+        f>>SettingName;
+        ConfigInfo &x=configinfo;
+        if(SettingName=="Speed"){
+          f>>x.Speed[0]>>x.Speed[1]>>x.Speed[2];
+          x.Speed[0]/=3.6;
+          x.Speed[1]/=3.6;
+          x.Speed[2]/=3.6;
+        }
+        else if(SettingName=="DesiredDistance") {f>>x.DesiredDistance;}
+        else if(SettingName=="SteerKp"){f>>x.SteerKp[0]>>x.SteerKp[1]>>x.SteerKp[2];}
+        else if(SettingName=="SteerKi"){f>>x.SteerKi[0]>>x.SteerKi[1]>>x.SteerKi[2];}
+        else if(SettingName=="SteerKd"){f>>x.SteerKd[0]>>x.SteerKd[1]>>x.SteerKd[2];}
+        else if(SettingName=="LookAheadDistance"){
+          f>>x.LookAheadDistance[0]>>x.LookAheadDistance[1]>>x.LookAheadDistance[2];
+        }
+        else if(SettingName=="SteerPIDProportion") {f>>x.SteerPIDProportion;}
+        else if(SettingName=="AccKd"){f>>x.AccKd[0]>>x.AccKd[1]>>x.AccKd[2];}
+        else if(SettingName=="AccKv"){f>>x.AccKv[0]>>x.AccKv[1]>>x.AccKv[2];}
+        else if(SettingName=="AccKa"){f>>x.AccKa[0]>>x.AccKa[1]>>x.AccKa[2];}
+        else if(SettingName=="DeltaS"){
+          f>>x.DeltaS[0]>>x.DeltaS[1]; 
+          if(x.DeltaS[0]>=x.DeltaS[1]) {
+            float temp=x.DeltaS[0];x.DeltaS[0]=x.DeltaS[1];x.DeltaS[1]=temp;
+          }
+        }
+        else if(SettingName=="AccLimit"){
+          f>>x.AccLimit[0]>>x.AccLimit[1]; 
+          if(x.AccLimit[0]>=x.AccLimit[1]) {
+            float temp=x.AccLimit[0];
+            x.AccLimit[0]=x.AccLimit[1];
+            x.AccLimit[1]=temp;
+          }
+        }
+        else if(SettingName=="PedalEffect"){f>>x.PedalEffect;}
+        else if(SettingName=="kAcc"){f>>x.kAcc;}
+        else if(SettingName=="kBrake"){f>>x.kBrake;}
+        else if(SettingName=="bAcc"){f>>x.bAcc;}
+        else if(SettingName=="bBrake"){f>>x.bBrake;}
+        else if(SettingName=="AccCorrectMax"){f>>x.AccCorrectMax;}
+        else if(SettingName=="BrakeCorrectMax"){f>>x.BrakeCorrectMax;}
+      }
+  }
+  else AERROR << "ControlSettings.config Missing";
+  AINFO<<"Config Parameters:";
+  AINFO<<"Desireddistance"<<configinfo.DesiredDistance;
+  AINFO<<"kACC "<<configinfo.kAcc;
+  AINFO<<"bACC "<<configinfo.bAcc;
 }

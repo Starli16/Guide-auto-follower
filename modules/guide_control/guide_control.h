@@ -29,7 +29,6 @@ class guide_Control : public apollo::cyber::Component<ChassisDetail, TrajInfo> {
   float lookahead_x = 0;
   float lookahead_y = 0;
   float err_lat = 0;
-  float steer_PID_kp,steer_PID_ki,steer_PID_kd;
   float BezierX[251], BezierY[251];
   ControlCommand controlcmd;
   float Caculate_steer(const std::shared_ptr<ChassisDetail>& msg0,const std::shared_ptr<TrajInfo>& msg1);
@@ -39,5 +38,19 @@ class guide_Control : public apollo::cyber::Component<ChassisDetail, TrajInfo> {
   float CalBezierLoc(int n, float t, float p[]);
   int FindLookAheadPoint(float LookAheadDis, const std::shared_ptr<TrajInfo>& msg1);
   int FindLookAheadPointBezier(float LookAheadDis);
+  void ReadConfig();
+  struct ConfigInfo{
+    float Speed[4]; // 文件中输入km/h 程序转换成m/s 
+    float DesiredDistance; //m
+    float SteerKp[3],SteerKi[3],SteerKd[3];
+    float LookAheadDistance[3]; // m
+    float SteerPIDProportion; 
+    float AccLimit[2]; // m/s^2
+    float AccKd[3],AccKv[3],AccKa[3];
+    float DeltaS[2]; // m
+    float PedalEffect; 
+    float kAcc,kBrake,bAcc,bBrake;
+    float AccCorrectMax,BrakeCorrectMax; // m/s^2
+  }configinfo;
 };
 CYBER_REGISTER_COMPONENT(guide_Control)

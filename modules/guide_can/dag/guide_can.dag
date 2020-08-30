@@ -5,7 +5,7 @@
         class_name : "guide_Canbus"
         config {
             name : "guide_Canbus"
-            interval : 20
+            interval : 10
         }
       }
     }

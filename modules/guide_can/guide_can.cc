@@ -32,7 +32,7 @@ bool guide_Canbus::Init() {
   AINFO << "Canbus Init";
 
   chassis_detail_writer_ =
-      node_->CreateWriter<ChassisDetail>("guide/ChassisDetail");
+      node_->CreateWriter<ChassisDetail>("guide/ChassisDetailOrig");
   // Create Writer
 
   control_command_reader_ = node_->CreateReader<ControlCommand>(
