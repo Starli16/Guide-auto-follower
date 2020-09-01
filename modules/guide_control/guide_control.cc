@@ -16,8 +16,8 @@ constexpr float r = 1.0;
 
 bool guide_Control::Init() {
   using namespace std;
-  ReadConfig();
   AINFO << "Guide_Control init";
+  ReadConfig();
   writer = node_->CreateWriter<ControlCommand>("guide/ControlCommand");
   // Init ControlCommand Writer
   return true;
@@ -114,7 +114,6 @@ float guide_Control::CalBezierLoc(int n, float t, float p[]) {
     ret *= p[j];
     loc += ret;
   }
-
   return loc;
 }
 
@@ -323,6 +322,7 @@ void guide_Control::ReadConfig(){
   ifstream f;
   f.open("/apollo/modules/guide_control/ControlSettings.config");
   if(f.is_open()){
+      AINFO<<"Control Config File Opened";
       while(!f.eof()){
         string SettingName;
         f>>SettingName;
@@ -368,8 +368,26 @@ void guide_Control::ReadConfig(){
       }
   }
   else AERROR << "ControlSettings.config Missing";
+  //output Configinfo
   AINFO<<"Config Parameters:";
   AINFO<<"Desireddistance"<<configinfo.DesiredDistance;
+  AINFO<<"Speed "<<configinfo.Speed;
+  AINFO<<"SteerKp "<<configinfo.SteerKp[0]<<" "<<configinfo.SteerKp[1]<<" "<<configinfo.SteerKp[2];
+  AINFO<<"SteerKi "<<configinfo.SteerKi[0]<<" "<<configinfo.SteerKi[1]<<" "<<configinfo.SteerKi[2];
+  AINFO<<"SteerKc "<<configinfo.SteerKd[0]<<" "<<configinfo.SteerKd[1]<<" "<<configinfo.SteerKd[2];
+  AINFO<<"LookAheadDistance"<<configinfo.LookAheadDistance;
+  AINFO<<"SteerPIDProportion"<<configinfo.SteerPIDProportion;
+  AINFO<<"AccKd "<<configinfo.AccKd[0]<<" "<<configinfo.AccKd[1]<<" "<<configinfo.AccKd[2];
+  AINFO<<"AccKv "<<configinfo.AccKv[0]<<" "<<configinfo.AccKv[1]<<" "<<configinfo.AccKv[2];
+  AINFO<<"AccKa "<<configinfo.AccKa[0]<<" "<<configinfo.AccKa[1]<<" "<<configinfo.AccKa[2];
+  AINFO<<"DeltaS "<<configinfo.DeltaS[0]<<" "<<configinfo.DeltaS[1];
+  AINFO<<"AccLimit "<<configinfo.AccLimit[0]<<" "<<configinfo.AccLimit[1];
+  AINFO<<"PedalEffect"<<configinfo.PedalEffect;
   AINFO<<"kACC "<<configinfo.kAcc;
   AINFO<<"bACC "<<configinfo.bAcc;
+  AINFO<<"kBrake "<<configinfo.kBrake;
+  AINFO<<"bBrake "<<configinfo.bBrake;
+  AINFO<<"AccCorrectMax "<<configinfo.AccCorrectMax;
+  AINFO<<"BrakeCorrectMax "<<configinfo.BrakeCorrectMax;
+  
 }
