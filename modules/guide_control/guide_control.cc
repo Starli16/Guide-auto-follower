@@ -16,8 +16,8 @@ constexpr float r = 1.0;
 
 bool guide_Control::Init() {
   using namespace std;
-  ReadConfig();
   AINFO << "Guide_Control init";
+  ReadConfig();
   writer = node_->CreateWriter<ControlCommand>("guide/ControlCommand");
   // Init ControlCommand Writer
   return true;
@@ -114,7 +114,6 @@ float guide_Control::CalBezierLoc(int n, float t, float p[]) {
     ret *= p[j];
     loc += ret;
   }
-
   return loc;
 }
 
@@ -232,6 +231,7 @@ float guide_Control::Caculate_acc(const std::shared_ptr<ChassisDetail>& msg0) {
   // cout << "delta x = " << long_distance - Desired_distance << endl;
   float distance_error = distance - float(Desired_distance);
   AINFO<<"distance_error= "<<distance_error;
+  AINFO<<"Leader_Brake_pedal="<<Leader_Brake_pedal<<" "<<"Leader_Acc_pedal="<<Leader_Acc_pedal;
   if (distance_error < DeltaS_up && distance_error > DeltaS_down)
     control_acc = k_a * a1 + k_v * (v1 - v2) + k_d * distance_error;
   else
@@ -249,7 +249,7 @@ float guide_Control::Caculate_acc(const std::shared_ptr<ChassisDetail>& msg0) {
       double k=kBrake*pedal+bBrake;
       if(k>BrakeCorrectMax)  k=BrakeCorrectMax;
 
-      AINFO << "AccCorrect Value = -"<<k*pedal;
+      AINFO << "AccCorrect Value = "<<k*pedal;
       control_acc=control_acc-k*pedal;
     }
   }
@@ -271,6 +271,8 @@ float guide_Control::Caculate_acc(const std::shared_ptr<ChassisDetail>& msg0) {
     control_acc = ACC_LIMIT;  // acc limit
   else if (control_acc < DEACC_LIMIT)
     control_acc = DEACC_LIMIT;  // deacc limit
+
+  AINFO<<"contorl_acc= "<<control_acc;
 
   return control_acc;
 }
@@ -323,6 +325,7 @@ void guide_Control::ReadConfig(){
   ifstream f;
   f.open("/apollo/modules/guide_control/ControlSettings.config");
   if(f.is_open()){
+      AINFO<<"Control Config File Opened";
       while(!f.eof()){
         string SettingName;
         f>>SettingName;
@@ -366,10 +369,29 @@ void guide_Control::ReadConfig(){
         else if(SettingName=="AccCorrectMax"){f>>x.AccCorrectMax;}
         else if(SettingName=="BrakeCorrectMax"){f>>x.BrakeCorrectMax;}
       }
+      f.close();
   }
   else AERROR << "ControlSettings.config Missing";
+  //output Configinfo
   AINFO<<"Config Parameters:";
   AINFO<<"Desireddistance"<<configinfo.DesiredDistance;
+  AINFO<<"Speed "<<configinfo.Speed[0]<<" "<<configinfo.Speed[1]<<" "<<configinfo.Speed[2];
+  AINFO<<"SteerKp "<<configinfo.SteerKp[0]<<" "<<configinfo.SteerKp[1]<<" "<<configinfo.SteerKp[2];
+  AINFO<<"SteerKi "<<configinfo.SteerKi[0]<<" "<<configinfo.SteerKi[1]<<" "<<configinfo.SteerKi[2];
+  AINFO<<"SteerKc "<<configinfo.SteerKd[0]<<" "<<configinfo.SteerKd[1]<<" "<<configinfo.SteerKd[2];
+  AINFO<<"LookAheadDistance"<<configinfo.LookAheadDistance[0]<<" "<<configinfo.LookAheadDistance[1]<<" "<<configinfo.LookAheadDistance[2];
+  AINFO<<"SteerPIDProportion"<<configinfo.SteerPIDProportion;
+  AINFO<<"AccKd "<<configinfo.AccKd[0]<<" "<<configinfo.AccKd[1]<<" "<<configinfo.AccKd[2];
+  AINFO<<"AccKv "<<configinfo.AccKv[0]<<" "<<configinfo.AccKv[1]<<" "<<configinfo.AccKv[2];
+  AINFO<<"AccKa "<<configinfo.AccKa[0]<<" "<<configinfo.AccKa[1]<<" "<<configinfo.AccKa[2];
+  AINFO<<"DeltaS "<<configinfo.DeltaS[0]<<" "<<configinfo.DeltaS[1];
+  AINFO<<"AccLimit "<<configinfo.AccLimit[0]<<" "<<configinfo.AccLimit[1];
+  AINFO<<"PedalEffect"<<configinfo.PedalEffect;
   AINFO<<"kACC "<<configinfo.kAcc;
   AINFO<<"bACC "<<configinfo.bAcc;
+  AINFO<<"kBrake "<<configinfo.kBrake;
+  AINFO<<"bBrake "<<configinfo.bBrake;
+  AINFO<<"AccCorrectMax "<<configinfo.AccCorrectMax;
+  AINFO<<"BrakeCorrectMax "<<configinfo.BrakeCorrectMax;
+  
 }
